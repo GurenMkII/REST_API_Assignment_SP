@@ -2,6 +2,7 @@ package com.win.rest_api_assignment;
 
 import java.util.List;
 
+import org.springframework.hateoas.EntityModel;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,12 +34,23 @@ class EmployeeController {
 
   // Single item
 
-  @GetMapping("/employees/{id}")
-  Employee one(@PathVariable Long id) {
+//   @GetMapping("/employees/{id}")
+//   Employee one(@PathVariable Long id) {
 
-    return repository.findById(id)
+//     return repository.findById(id)
+//       .orElseThrow(() -> new EmployeeNotFoundException(id));
+//   }
+
+  @GetMapping("/employees/{id}")
+    EntityModel<Employee> one(@PathVariable Long id) {
+
+    Employee employee = repository.findById(id) //
       .orElseThrow(() -> new EmployeeNotFoundException(id));
-  }
+
+    return EntityModel.of(employee, //
+      linkTo(methodOn(EmployeeController.class).one(id)).withSelfRel(),
+      linkTo(methodOn(EmployeeController.class).all()).withRel("employees"));
+}
 
   @PutMapping("/employees/{id}")
   Employee replaceEmployee(@RequestBody Employee newEmployee, @PathVariable Long id) {
